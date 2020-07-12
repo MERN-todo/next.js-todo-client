@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export default function IndexPage() {
-  const [tasks, setTasks] = useState(['footie', 'tennis', 'cricket', 'cook']);
+  const [tasks, setTasks] = useState([]);
   const [noteText, setNoteText] = useState('');
 
   const handleSubmit = (e) => {
@@ -18,8 +18,8 @@ export default function IndexPage() {
   const handleDelete = (note) => {
     const taskCopy = [...tasks];
     const index = taskCopy.indexOf(note);
-    const newTasks = taskCopy.splice(index);
-    setTasks(newTasks);
+    taskCopy.pop(index);
+    setTasks(taskCopy);
   };
 
   return (
@@ -38,12 +38,12 @@ export default function IndexPage() {
       </form>
       <div className="grid grid-cols-3 gap-4 p-4">
         {tasks.map((note) => (
-          <div className="text-center p-2 flex justify-around flex-row items-center bg-gray-200 rounded">
-            <div className="m-2 py-2 px-4" key={note}>
+          <div key={note} className="text-center p-2 flex justify-around flex-row items-center bg-gray-200 rounded">
+            <div className="m-2 py-2 px-4">
               {note}
             </div>
             <div className="m-2 py-2 px-4">
-              <button type="button" onClick={() => handleDelete(note)} className="text-center bg-blue-500 py-2 px-4 rounded text-white">
+              <button type="button" onClick={() => handleDelete(note)} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                 delete
               </button>
             </div>
