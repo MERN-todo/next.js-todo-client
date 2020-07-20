@@ -1,55 +1,54 @@
-import { useState } from 'react';
+import { useState } from 'react'
+import useSWR from 'swr'
+import Layout from '../containers/layout'
+import SubmitButton from '../elements/submitButton'
+import TaskTitleInput from '../elements/taskTitleInput'
+import TaskDateInput from '../elements/taskDateInput'
+import { submitNewTask } from '../utils/apiRequests'
+import { serverUrl } from '../config'
+import { serverToCalendarFormat } from '../utils/utilFunctions'
 
-export default function IndexPage() {
-  const [tasks, setTasks] = useState([]);
-  const [noteText, setNoteText] = useState('');
+import Calendar from '../components/calendar'
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!noteText) {
-      return;
+const fetcher = url => fetch(url).then(r => r.json())
+
+export default function IndexPage () {
+  const [noteText, setNoteText] = useState('')
+  const [noteDate, setNoteDate] = useState()
+
+  const { data, mutate } = useSWR(`${serverUrl}/api/v1/tasks`, fetcher)
+  const tasks = data ? data.map(task => serverToCalendarFormat(task)) : []
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+    const task = {
+      title: noteText,
+      start: noteDate,
+      end: noteDate,
+      completed: false
     }
-    const taskCopy = [...tasks];
-    taskCopy.push(noteText);
-    setTasks(taskCopy);
-    setNoteText('');
-  };
-
-  const handleDelete = (note) => {
-    const taskCopy = [...tasks];
-    const index = taskCopy.indexOf(note);
-    taskCopy.pop(index);
-    setTasks(taskCopy);
-  };
+    await submitNewTask(task)
+    setNoteText('')
+    mutate([...data, task])
+  }
 
   return (
-    <div className="container mx-auto">
-      <div className="hero">
-        <h1 className="title">Planner!</h1>
-      </div>
-      <form className="text-center" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          className="text-center bg-gray-300 py-4 rounded"
-          placeholder="Add task"
+    <Layout title='Task Calendar'>
+      <form
+        className='text-center grid grid-cols-3 gap-4 py-4'
+        onSubmit={handleSubmit}
+      >
+        <TaskTitleInput
           value={noteText}
-          onChange={(e) => setNoteText(e.target.value)}
+          onChange={e => setNoteText(e.target.value)}
         />
+        <TaskDateInput
+          value={noteDate}
+          onChange={e => setNoteDate(e.target.value)}
+        />
+        <SubmitButton disabled={!noteText || !noteDate} />
       </form>
-      <div className="grid grid-cols-3 gap-4 p-4">
-        {tasks.map((note) => (
-          <div key={note} className="text-center p-2 flex justify-around flex-row items-center bg-gray-200 rounded">
-            <div className="m-2 py-2 px-4">
-              {note}
-            </div>
-            <div className="m-2 py-2 px-4">
-              <button type="button" onClick={() => handleDelete(note)} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+      {tasks ? <Calendar tasks={tasks} /> : <Calendar tasks={[]} />}
+    </Layout>
+  )
 }

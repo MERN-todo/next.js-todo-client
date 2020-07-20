@@ -5,7 +5,8 @@
     },
     "extends": [
         "plugin:react/recommended",
-        "airbnb"
+        "airbnb",
+        "plugin:import"
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -15,7 +16,6 @@
         "sourceType": "module"
     },
     "plugins": [
-        "react"
     ],
     "rules": {
         "react/react-in-jsx-scope": "off",
